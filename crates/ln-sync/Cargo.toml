@@ -1,0 +1,18 @@
+[package]
+name = "ln-sync"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ln-core.workspace = true
+ln-net.workspace = true
+serde.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros"] }

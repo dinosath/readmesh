@@ -1,0 +1,35 @@
+[package]
+name = "ln-daemon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "ln_daemon"
+path = "src/lib.rs"
+
+[[bin]]
+name = "lnreaderd"
+path = "src/main.rs"
+
+[dependencies]
+ln-core.workspace = true
+ln-store.workspace = true
+ln-plugin.workspace = true
+ln-net.workspace = true
+ln-transport.workspace = true
+ln-metalink.workspace = true
+ln-rpc.workspace = true
+ln-sync.workspace = true
+
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap = { version = "4", features = ["derive"] }
+anyhow.workspace = true
+blake3.workspace = true
+chrono.workspace = true

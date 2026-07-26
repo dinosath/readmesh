@@ -1,0 +1,71 @@
+[workspace]
+members = [
+  "crates/ln-core",
+  "crates/ln-store",
+  "crates/ln-plugin",
+  "crates/ln-net",
+  "crates/ln-transport",
+  "crates/ln-metalink",
+  "crates/ln-sync",
+  "crates/ln-daemon",
+  "crates/ln-rpc",
+  "crates/ln-ui",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/lnreader-rs/lnreader-rs"
+rust-version = "1.83"
+
+[workspace.dependencies]
+# async
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rmp-serde = "1"
+
+# hashing
+blake3 = { version = "1", features = ["serde"] }
+
+# error handling
+thiserror = "2"
+anyhow = "1"
+
+# logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# uuid
+uuid = { version = "1", features = ["v4", "v7", "serde"] }
+
+# time
+chrono = { version = "0.4", features = ["serde"] }
+time = "0.3"
+
+# bytes
+bytes = "1"
+
+# internal crates
+ln-core = { path = "crates/ln-core" }
+ln-store = { path = "crates/ln-store" }
+ln-plugin = { path = "crates/ln-plugin" }
+ln-net = { path = "crates/ln-net" }
+ln-transport = { path = "crates/ln-transport" }
+ln-metalink = { path = "crates/ln-metalink" }
+ln-sync = { path = "crates/ln-sync" }
+ln-rpc = { path = "crates/ln-rpc" }
+ln-daemon = { path = "crates/ln-daemon" }
+ln-ui = { path = "crates/ln-ui" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = 3
+strip = true

@@ -1,0 +1,42 @@
+[workspace]
+release = true
+
+[[package]]
+name = "ln-core"
+publish = false
+
+[[package]]
+name = "ln-store"
+publish = false
+
+[[package]]
+name = "ln-plugin"
+publish = false
+
+[[package]]
+name = "ln-net"
+publish = false
+
+[[package]]
+name = "ln-transport"
+publish = false
+
+[[package]]
+name = "ln-metalink"
+publish = false
+
+[[package]]
+name = "ln-sync"
+publish = false
+
+[[package]]
+name = "ln-daemon"
+publish = false
+
+[[package]]
+name = "ln-rpc"
+publish = false
+
+[[package]]
+name = "ln-ui"
+publish = false

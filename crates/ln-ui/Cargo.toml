@@ -1,0 +1,25 @@
+[package]
+name = "ln-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "lnreader"
+path = "src/main.rs"
+
+[dependencies]
+ln-core.workspace = true
+ln-rpc.workspace = true
+ln-daemon.workspace = true
+ln-store.workspace = true
+ln-plugin.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+clap = { version = "4", features = ["derive"] }
+hex = "0.4"
