@@ -79,6 +79,7 @@ script_mod! {
             }
         }
 
+        nav_icon := View{width: 20 height: 20}
         nav_label := Label{
             width: Fill
             text: "Item"
@@ -87,18 +88,23 @@ script_mod! {
         }
     }
 
-    // Compact variant for the mobile bottom bar (centered, smaller).
+    // Tab variant for the mobile bottom bar (icon above label, centered).
     mod.widgets.RmNavTabButton = mod.widgets.RmNavButton{
-        height: 48
+        height: 56
+        flow: Down
         align: Center
+        spacing: 2
         padding: theme.mspace_h_1
         draw_bg +: {
-            border_radius: uniform(10.0)
+            border_radius: uniform(8.0)
+        }
+        nav_icon +: {
+            width: 22 height: 22
         }
         nav_label +: {
             align: Center
             draw_text +: {
-                text_style +: {font_size: theme.font_size_p}
+                text_style +: {font_size: theme.font_size_code}
             }
         }
     }
@@ -134,11 +140,26 @@ script_mod! {
                     }
                 }
 
-                rail_library := RmNavButton{nav_label.text: "Library"}
-                rail_browse := RmNavButton{nav_label.text: "Browse"}
-                rail_search := RmNavButton{nav_label.text: "Search"}
-                rail_downloads := RmNavButton{nav_label.text: "Downloads"}
-                rail_settings := RmNavButton{nav_label.text: "Settings"}
+                rail_library := RmNavButton{
+                    nav_icon := IconBook{}
+                    nav_label.text: "Library"
+                }
+                rail_browse := RmNavButton{
+                    nav_icon := IconCompass{}
+                    nav_label.text: "Browse"
+                }
+                rail_search := RmNavButton{
+                    nav_icon := IconSearch{}
+                    nav_label.text: "Search"
+                }
+                rail_downloads := RmNavButton{
+                    nav_icon := IconDownload{}
+                    nav_label.text: "Downloads"
+                }
+                rail_settings := RmNavButton{
+                    nav_icon := IconGear{}
+                    nav_label.text: "Settings"
+                }
 
                 Filler{}
 
@@ -167,17 +188,32 @@ script_mod! {
 
         bottom_nav := SolidView{
             width: Fill height: Fit
-            flow: Right spacing: theme.space_1
+            flow: Right
             padding: theme.mspace_1
             draw_bg.color: theme.color_fg_app
             new_batch: true
             visible: false
 
-            tab_library := RmNavTabButton{nav_label.text: "Library"}
-            tab_browse := RmNavTabButton{nav_label.text: "Browse"}
-            tab_search := RmNavTabButton{nav_label.text: "Search"}
-            tab_downloads := RmNavTabButton{nav_label.text: "Downloads"}
-            tab_settings := RmNavTabButton{nav_label.text: "Settings"}
+            tab_library := RmNavTabButton{
+                nav_icon := IconBook{}
+                nav_label.text: "Library"
+            }
+            tab_browse := RmNavTabButton{
+                nav_icon := IconCompass{}
+                nav_label.text: "Browse"
+            }
+            tab_search := RmNavTabButton{
+                nav_icon := IconSearch{}
+                nav_label.text: "Search"
+            }
+            tab_downloads := RmNavTabButton{
+                nav_icon := IconDownload{}
+                nav_label.text: "Downloads"
+            }
+            tab_settings := RmNavTabButton{
+                nav_icon := IconGear{}
+                nav_label.text: "Settings"
+            }
         }
     }
 }

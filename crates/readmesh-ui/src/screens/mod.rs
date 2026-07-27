@@ -124,6 +124,8 @@ pub fn populate_card(
     novel: &Novel,
     progress: f32,
     meta: &str,
+    total_chapters: usize,
+    read_count: usize,
 ) {
     item.label(cx, &[card_id, id!(card_title)])
         .set_text(cx, &novel.title);
@@ -145,6 +147,19 @@ pub fn populate_card(
     .set_text(cx, &cover_initial(&novel.title));
     item.rm_cover(cx, &[card_id, id!(cover_wrap), id!(cover)])
         .set_color(cover_color(&novel.id));
+
+    // Unread count badge (top-left corner of cover).
+    let unread = total_chapters.saturating_sub(read_count);
+    let badge = item.view(cx, &[card_id, id!(cover_wrap), id!(unread_badge)]);
+    let show_badge = unread > 0;
+    badge.set_visible(cx, show_badge);
+    if show_badge {
+        item.label(
+            cx,
+            &[card_id, id!(cover_wrap), id!(unread_badge), id!(badge_label)],
+        )
+        .set_text(cx, &unread.to_string());
+    }
 
     // Reading progress bar along the cover bottom (hidden at 0).
     let wrap = item.view(cx, &[card_id, id!(cover_wrap), id!(progress_wrap)]);
@@ -186,7 +201,8 @@ pub fn draw_card_row(
                     let chapters = state.catalog.chapters(novel_id).len();
                     let status = format!("{:?}", novel.status);
                     let meta = format!("{chapters} chapters · {status}");
-                    populate_card(cx, &item, *card_id, &novel, progress, &meta);
+                    let read_count = state.library.read_count_for(novel_id);
+                    populate_card(cx, &item, *card_id, &novel, progress, &meta, chapters, read_count);
                 } else {
                     hide_card(cx, &item, *card_id);
                 }

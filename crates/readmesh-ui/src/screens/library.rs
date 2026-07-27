@@ -1,14 +1,11 @@
-//! Library / Home screen: Continue Reading, Favorites, Recently Added,
-//! Recently Updated, Categories and the full library grid.
-
 use makepad_widgets::*;
-use readmesh_app::AppState;
+use readmesh_app::{AppState, ContentRepository};
 use readmesh_core::NovelId;
 
 use crate::app::AppAction;
 use crate::components::RmChipWidgetRefExt;
 use crate::screens::{
-    GridRow, card_novel_at, draw_card_row, grid_cols, push_card_rows, push_section,
+    GridRow, card_novel_at, draw_card_row, grid_cols, push_card_rows,
 };
 use crate::state::{state, with_state_mut};
 
@@ -24,13 +21,14 @@ script_mod! {
             width: Fill height: Fit
             padding: theme.mspace_3{left: theme.space_3 * 2, right: theme.space_3 * 2}
             draw_bg.color: theme.color_bg_app
-            flow: Right
+            flow: Right spacing: theme.space_2
             align: Align{y: 0.5}
             new_batch: true
-            Label{
-                text: "Library"
-                draw_text.color: theme.color_label_inner
-                draw_text.text_style: theme.font_bold{font_size: theme.font_size_2}
+            search_input := RmTextInput{
+                empty_text: "Search Library"
+            }
+            filter_button := RmSmallButton{
+                text: ""
             }
         }
 
@@ -56,58 +54,33 @@ script_mod! {
     }
 }
 
-/// Build the row model from state (pure projection, rebuilt every draw).
-fn build_rows(s: &AppState, cols: usize, category: Option<&str>) -> Vec<GridRow> {
+fn build_rows(s: &AppState, cols: usize, query: &str) -> Vec<GridRow> {
     let mut rows = Vec::new();
 
-    // Continue Reading (novels with saved progress).
-    let continue_reading: Vec<NovelId> = s.continue_reading().iter().map(|i| i.novel_id).collect();
-    push_section(&mut rows, "Continue Reading", &continue_reading, cols);
-
-    // Favorites / bookmarks.
-    let favorites = s.library.favorites();
-    push_section(&mut rows, "Favorites", &favorites, cols);
-
-    // Recently Added / Recently Updated.
-    let added = s.library.recently_added(8);
-    push_section(&mut rows, "Recently Added", &added, cols);
-    let updated = s.library.recently_updated(8);
-    push_section(&mut rows, "Recently Updated", &updated, cols);
-
-    // Categories.
-    let categories: Vec<String> = s.library.categories().keys().cloned().collect();
-    if !categories.is_empty() {
-        rows.push(GridRow::Section {
-            title: "Categories".to_string(),
-            note: String::new(),
-        });
-        rows.push(GridRow::Chips(categories));
-    }
-
-    // Full library grid, optionally filtered by the selected category.
     let all = s.library.all_sorted();
-    let filtered: Vec<NovelId> = match category {
-        Some(cat) => all
-            .into_iter()
-            .filter(|id| {
-                s.library
-                    .library
-                    .get_novel(id)
-                    .and_then(|n| n.tags.first())
-                    .is_some_and(|t| t.name == cat)
+    let filtered: Vec<NovelId> = if query.is_empty() {
+        all
+    } else {
+        let q = query.to_lowercase();
+        all.into_iter().filter(|id| {
+            s.catalog.novel(id).is_some_and(|n| {
+                n.title.to_lowercase().contains(&q)
+                    || n.authors.iter().any(|a| a.name.to_lowercase().contains(&q))
+                    || n.tags.iter().any(|t| t.name.to_lowercase().contains(&q))
             })
-            .collect(),
-        None => all,
+        }).collect()
     };
+
     if filtered.is_empty() && s.library.novel_count() == 0 {
         rows.push(GridRow::Empty);
-    } else {
-        let title = match category {
-            Some(cat) => format!("Library · {cat}"),
-            None => "Library".to_string(),
-        };
+    } else if filtered.is_empty() {
         rows.push(GridRow::Section {
-            title,
+            title: "No results".to_string(),
+            note: String::new(),
+        });
+    } else {
+        rows.push(GridRow::Section {
+            title: String::new(),
             note: format!("{}", filtered.len()),
         });
         push_card_rows(&mut rows, &filtered, cols);
@@ -124,11 +97,10 @@ pub struct LibraryScreen {
     #[rust]
     rows: Vec<GridRow>,
     #[rust]
-    selected_category: Option<String>,
+    query: String,
 }
 
 impl LibraryScreen {
-    /// Populate a chip row from a list of labels.
     pub fn draw_chip_row(
         cx: &mut Cx2d,
         item: &WidgetRef,
@@ -169,7 +141,8 @@ impl Widget for LibraryScreen {
 
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         let cols = grid_cols(state().nav.mode());
-        self.rows = build_rows(&state(), cols, self.selected_category.as_deref());
+        self.query = self.view.text_input(cx, ids!(header.search_input)).text();
+        self.rows = build_rows(&state(), cols, &self.query);
         let rows = self.rows.clone();
 
         while let Some(step) = self.view.draw_walk(cx, scope, walk).step() {
@@ -191,12 +164,7 @@ impl Widget for LibraryScreen {
                         }
                         GridRow::Chips(chips) => {
                             let item = list.item(cx, item_id, id!(Chips));
-                            Self::draw_chip_row(
-                                cx,
-                                &item,
-                                chips,
-                                self.selected_category.as_deref(),
-                            );
+                            Self::draw_chip_row(cx, &item, chips, None);
                             item.draw_all_unscoped(cx);
                         }
                         GridRow::Empty => {
@@ -224,33 +192,17 @@ impl WidgetMatchEvent for LibraryScreen {
                         cx.action(AppAction::StateChanged);
                     }
                 }
-                Some(GridRow::Chips(chips)) => {
-                    const CHIP_IDS: [LiveId; 8] = [
-                        id!(chip0),
-                        id!(chip1),
-                        id!(chip2),
-                        id!(chip3),
-                        id!(chip4),
-                        id!(chip5),
-                        id!(chip6),
-                        id!(chip7),
-                    ];
-                    for (i, chip_id) in CHIP_IDS.iter().enumerate() {
-                        if item.rm_chip(cx, &[*chip_id]).clicked(actions)
-                            && let Some(chip) = chips.get(i)
-                        {
-                            // Toggle the category filter.
-                            if self.selected_category.as_deref() == Some(chip.as_str()) {
-                                self.selected_category = None;
-                            } else {
-                                self.selected_category = Some(chip.clone());
-                            }
-                            cx.action(AppAction::StateChanged);
-                        }
-                    }
-                }
                 _ => {}
             }
+        }
+
+        if self
+            .view
+            .text_input(cx, ids!(header.search_input))
+            .returned(actions)
+            .is_some()
+        {
+            cx.action(AppAction::StateChanged);
         }
     }
 }

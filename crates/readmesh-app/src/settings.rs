@@ -90,6 +90,8 @@ pub struct AppSettings {
     pub network: NetworkSettings,
     /// Per-source enable flags keyed by source id (empty = all enabled).
     pub disabled_sources: Vec<String>,
+    /// Pinned / favorited source ids (empty = none pinned).
+    pub pinned_sources: Vec<String>,
 }
 
 impl AppSettings {
@@ -114,6 +116,32 @@ impl AppSettings {
         } else {
             self.disabled_sources.push(source_id.to_string());
             false
+        }
+    }
+
+    // ---- pinned sources ----------------------------------------------------
+
+    pub fn is_pinned(&self, source_id: &str) -> bool {
+        self.pinned_sources.iter().any(|s| s == source_id)
+    }
+
+    pub fn pin_source(&mut self, source_id: &str) {
+        if !self.is_pinned(source_id) {
+            self.pinned_sources.push(source_id.to_string());
+        }
+    }
+
+    pub fn unpin_source(&mut self, source_id: &str) {
+        self.pinned_sources.retain(|s| s != source_id);
+    }
+
+    pub fn toggle_pin(&mut self, source_id: &str) -> bool {
+        if self.is_pinned(source_id) {
+            self.unpin_source(source_id);
+            false
+        } else {
+            self.pin_source(source_id);
+            true
         }
     }
 

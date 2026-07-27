@@ -1,16 +1,8 @@
-//! Reader screen: a distraction-free, full-screen reading experience.
-//!
-//! Chapter text with configurable typography and reader themes (dark /
-//! light / sepia), overlay controls that toggle on tap, previous/next
-//! chapter navigation and a chapter position indicator. All behavior is
-//! driven by `readmesh_app::reader` (unit tested).
-
 use makepad_widgets::*;
 use readmesh_app::{ContentRepository, ReaderTheme, Route};
-use readmesh_core::ChapterId;
 
 use crate::app::AppAction;
-use crate::components::RmTapWidgetExt;
+use crate::components::{RmTapWidgetExt, RmVerticalSliderWidgetExt};
 use crate::state::{state, with_state_mut};
 
 script_mod! {
@@ -21,8 +13,6 @@ script_mod! {
         width: Fill height: Fill
         flow: Overlay
 
-        // Base layer: the scrollable chapter text. The background color is
-        // drawn by the ReaderScreen widget itself (reader theme).
         reader_bg := View{
             width: Fill height: Fill
 
@@ -64,7 +54,7 @@ script_mod! {
             }
         }
 
-        // Top bar (overlay).
+        // Top overlay bar.
         top_bar := SolidView{
             width: Fill height: Fit
             flow: Right spacing: theme.space_2
@@ -72,38 +62,137 @@ script_mod! {
             padding: theme.mspace_2{left: theme.space_3, right: theme.space_3}
             draw_bg.color: #x000000b3
             new_batch: true
-            close_button := RmSmallButton{text: "← Back"}
-            novel_title := Label{
-                width: Fill
-                text: ""
-                draw_text.color: #xfff
-                draw_text.text_style: theme.font_bold{font_size: theme.font_size_4}
+            back_btn := RmTap{
+                width: 32 height: 32
+                flow: Overlay
+                align: Center
+                show_bg: false
+                cursor: MouseCursor.Hand
+                IconBack{}
             }
-            settings_button := RmSmallButton{text: "Aa"}
+            title_block := View{
+                width: Fill height: Fit
+                flow: Down spacing: 1
+                novel_title := Label{
+                    width: Fill
+                    text: ""
+                    draw_text.color: #xfff
+                    draw_text.text_style: theme.font_bold{font_size: theme.font_size_4}
+                }
+                chapter_subtitle := Label{
+                    width: Fill
+                    text: ""
+                    draw_text.color: #xfffd
+                    draw_text.text_style.font_size: theme.font_size_code
+                }
+            }
+            bookmark_btn := RmTap{
+                width: 28 height: 28
+                flow: Overlay
+                align: Center
+                show_bg: false
+                cursor: MouseCursor.Hand
+                IconBookmark{}
+            }
         }
 
-        // Bottom bar (overlay).
+        // Bottom overlay bar (icon row).
         bottom_bar := SolidView{
-            width: Fill height: Fill
+            width: Fill height: 48
             flow: Overlay
             draw_bg.color: #0000
             align: Align{x: 0.0 y: 1.0}
             bar_inner := SolidView{
-                width: Fill height: Fit
-                flow: Right spacing: theme.space_2
-                align: Align{y: 0.5}
-                padding: theme.mspace_2{left: theme.space_3, right: theme.space_3}
+                width: Fill height: 48
+                flow: Right
+                align: Center
                 draw_bg.color: #x000000b3
                 new_batch: true
-                prev_button := RmSmallButton{text: "← Prev"}
-                progress_label := Label{
-                    width: Fill
+                prev_btn := RmTap{
+                    width: 36 height: 36
+                    flow: Overlay
                     align: Center
-                    text: ""
-                    draw_text.color: #xfffd
-                    draw_text.text_style.font_size: theme.font_size_p
+                    show_bg: false
+                    cursor: MouseCursor.Hand
+                    IconPrev{}
                 }
-                next_button := RmSmallButton{text: "Next →"}
+                Filler{}
+                translate_btn := RmTap{
+                    width: 36 height: 36
+                    flow: Overlay
+                    align: Center
+                    show_bg: false
+                    cursor: MouseCursor.Hand
+                    IconTranslate{}
+                }
+                Filler{}
+                textsize_btn := RmTap{
+                    width: 36 height: 36
+                    flow: Overlay
+                    align: Center
+                    show_bg: false
+                    cursor: MouseCursor.Hand
+                    IconAa{}
+                }
+                Filler{}
+                gear_btn := RmTap{
+                    width: 36 height: 36
+                    flow: Overlay
+                    align: Center
+                    show_bg: false
+                    cursor: MouseCursor.Hand
+                    IconGear{}
+                }
+                Filler{}
+                next_btn := RmTap{
+                    width: 36 height: 36
+                    flow: Overlay
+                    align: Center
+                    show_bg: false
+                    cursor: MouseCursor.Hand
+                    IconNext{}
+                }
+            }
+        }
+
+        // Vertical chapter scrubber (right edge).
+        scrubber := SolidView{
+            width: Fit height: Fill
+            flow: Overlay
+            align: Align{x: 1.0 y: 0.5}
+            draw_bg.color: #x00000000
+            padding: Inset{left: 0 right: 0 top: 80 bottom: 80}
+            scrub_inner := View{
+                width: Fit height: Fill
+                flow: Overlay
+                align: Center
+                scrub_slider := RmVerticalSlider{
+                    width: 6 height: Fill
+                    draw_track +: {
+                        color: #xffffff22
+                        border_radius: 3.0
+                    }
+                    draw_thumb +: {
+                        color: theme.color_highlight
+                        border_radius: 3.0
+                    }
+                }
+                scrub_labels := View{
+                    width: Fit height: Fill
+                    flow: Down
+                    align: Center
+                    spacing: 4
+                    scrub_current := Label{
+                        text: "0"
+                        draw_text.color: theme.color_highlight
+                        draw_text.text_style: theme.font_bold{font_size: theme.font_size_code}
+                    }
+                    scrub_total := Label{
+                        text: "0"
+                        draw_text.color: #xfffa
+                        draw_text.text_style.font_size: theme.font_size_code
+                    }
+                }
             }
         }
 
@@ -184,8 +273,6 @@ script_mod! {
     }
 }
 
-/// Reader theme palettes (deliberately independent of the app theme, so the
-/// reader always offers dark/light/sepia regardless of global settings).
 const READER_DARK_BG: Vec4f = vec4(0.070, 0.086, 0.109, 1.0);
 const READER_DARK_TEXT: Vec4f = vec4(0.847, 0.870, 0.902, 1.0);
 const READER_LIGHT_BG: Vec4f = vec4(0.980, 0.973, 0.953, 1.0);
@@ -193,7 +280,6 @@ const READER_LIGHT_TEXT: Vec4f = vec4(0.169, 0.192, 0.220, 1.0);
 const READER_SEPIA_BG: Vec4f = vec4(0.953, 0.914, 0.843, 1.0);
 const READER_SEPIA_TEXT: Vec4f = vec4(0.290, 0.247, 0.184, 1.0);
 
-/// The full-screen Reader widget.
 #[derive(Script, ScriptHook, Widget)]
 pub struct ReaderScreen {
     #[deref]
@@ -202,14 +288,18 @@ pub struct ReaderScreen {
     #[live]
     draw_bg: DrawColor,
     #[rust]
-    loaded_chapter: Option<ChapterId>,
+    loaded_chapter: Option<readmesh_core::ChapterId>,
     #[rust]
     panel_open: bool,
+    #[rust]
+    last_novel_title: String,
+    #[rust]
+    last_chapter_index: u32,
+    #[rust]
+    last_total: usize,
 }
 
 impl ReaderScreen {
-    /// Sync all visual properties from reader state (theme, typography,
-    /// controls visibility, labels).
     fn sync(&mut self, cx: &mut Cx2d) {
         let (theme, font_size, line_spacing, controls_visible, current) = {
             let s = state();
@@ -222,7 +312,6 @@ impl ReaderScreen {
             )
         };
 
-        // Reader theme colors (direct field mutation, no script eval).
         let (bg_color, text_color) = match theme {
             ReaderTheme::Dark => (READER_DARK_BG, READER_DARK_TEXT),
             ReaderTheme::Light => (READER_LIGHT_BG, READER_LIGHT_TEXT),
@@ -246,7 +335,6 @@ impl ReaderScreen {
             body.draw_text.text_style.line_spacing = line_spacing;
         }
 
-        // Controls visibility.
         self.view
             .view(cx, ids!(top_bar))
             .set_visible(cx, controls_visible);
@@ -256,8 +344,10 @@ impl ReaderScreen {
         self.view
             .view(cx, ids!(settings_panel))
             .set_visible(cx, controls_visible && self.panel_open);
+        self.view
+            .view(cx, ids!(scrubber))
+            .set_visible(cx, controls_visible);
 
-        // Settings panel labels.
         let size_text = format!("{font_size:.0}");
         self.view
             .label(cx, ids!(settings_panel.font_size_label))
@@ -267,7 +357,6 @@ impl ReaderScreen {
             .label(cx, ids!(settings_panel.spacing_label))
             .set_text(cx, &spacing_text);
 
-        // Chapter content + position indicator.
         if let Some((novel_id, chapter_id)) = current {
             if self.loaded_chapter != Some(chapter_id) {
                 self.loaded_chapter = Some(chapter_id);
@@ -286,14 +375,16 @@ impl ReaderScreen {
                     self.view
                         .label(cx, ids!(reader_bg.content_tap.chapter_title))
                         .set_text(cx, &chapter.title);
+                    self.last_chapter_index = chapter.index;
                 }
                 let novel_title = s
                     .catalog
                     .novel(&novel_id)
                     .map(|n| n.title)
                     .unwrap_or_default();
+                self.last_novel_title = novel_title.clone();
                 self.view
-                    .label(cx, ids!(top_bar.novel_title))
+                    .label(cx, ids!(top_bar.title_block.novel_title))
                     .set_text(cx, &novel_title);
             }
 
@@ -301,18 +392,46 @@ impl ReaderScreen {
             let order = s.reading_order(&novel_id);
             let position = s.reader.position(&order).map(|p| p + 1).unwrap_or(0);
             let total = order.len();
-            let progress_text = format!("Chapter {position} of {total}");
+            self.last_total = total;
+            // Chapter subtitle in top bar.
+            let sub = format!("CH {}", self.last_chapter_index + 1);
             self.view
-                .label(cx, ids!(bottom_bar.bar_inner.progress_label))
-                .set_text(cx, &progress_text);
+                .label(cx, ids!(top_bar.title_block.chapter_subtitle))
+                .set_text(cx, &sub);
+
+            // Scrubber labels.
+            self.view
+                .label(cx, ids!(scrubber.scrub_inner.scrub_labels.scrub_current))
+                .set_text(cx, &position.to_string());
+            self.view
+                .label(cx, ids!(scrubber.scrub_inner.scrub_labels.scrub_total))
+                .set_text(cx, &total.to_string());
+
+            let _fraction = if total > 1 {
+                (position as f32 - 1.0) / (total as f32 - 1.0)
+            } else {
+                0.0
+            };
+            self.view
+                .rm_vertical_slider(
+                    cx,
+                    ids!(scrubber.scrub_inner.scrub_slider),
+                )
+                .set_range(cx, 0.0, (total - 1).max(0) as f32);
+            self.view
+                .rm_vertical_slider(
+                    cx,
+                    ids!(scrubber.scrub_inner.scrub_slider),
+                )
+                .set_value(cx, (position - 1) as f32);
 
             let has_prev = s.reader.has_prev(&order);
             let has_next = s.reader.has_next(&order);
             self.view
-                .button(cx, ids!(bottom_bar.bar_inner.prev_button))
+                .view(cx, ids!(bottom_bar.bar_inner.prev_btn))
                 .set_visible(cx, has_prev);
             self.view
-                .button(cx, ids!(bottom_bar.bar_inner.next_button))
+                .view(cx, ids!(bottom_bar.bar_inner.next_btn))
                 .set_visible(cx, has_next);
             self.view
                 .button(cx, ids!(reader_bg.content_tap.end_nav.prev_button2))
@@ -321,6 +440,20 @@ impl ReaderScreen {
                 .button(cx, ids!(reader_bg.content_tap.end_nav.next_button2))
                 .set_visible(cx, has_next);
         }
+    }
+
+    fn next_chapter(&mut self, cx: &mut Cx) {
+        with_state_mut(|s| {
+            s.reader_next_chapter();
+        });
+        cx.action(AppAction::StateChanged);
+    }
+
+    fn prev_chapter(&mut self, cx: &mut Cx) {
+        with_state_mut(|s| {
+            s.reader_prev_chapter();
+        });
+        cx.action(AppAction::StateChanged);
     }
 }
 
@@ -331,13 +464,11 @@ impl Widget for ReaderScreen {
     }
 
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        // Reset when the reader route is not active (e.g. reopened later).
         if !matches!(state().nav.current(), Route::Reader { .. }) {
             self.loaded_chapter = None;
             self.panel_open = false;
         }
         self.sync(cx);
-        // Paint the reader theme background behind the content.
         let rect = cx.peek_walk_turtle(walk);
         self.draw_bg.draw_abs(cx, rect);
         self.view.draw_walk(cx, scope, walk)
@@ -346,10 +477,10 @@ impl Widget for ReaderScreen {
 
 impl WidgetMatchEvent for ReaderScreen {
     fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions, _scope: &mut Scope) {
-        // Close the reader.
+        // Close reader — back icon.
         if self
             .view
-            .button(cx, ids!(top_bar.close_button))
+            .rm_tap(cx, ids!(top_bar.back_btn))
             .clicked(actions)
         {
             with_state_mut(|s| {
@@ -359,39 +490,33 @@ impl WidgetMatchEvent for ReaderScreen {
             return;
         }
 
-        // Chapter navigation (bottom bar + end-of-chapter buttons).
+        // Chapter navigation via prev/next buttons.
         let next = self
             .view
-            .button(cx, ids!(bottom_bar.bar_inner.next_button))
+            .rm_tap(cx, ids!(bottom_bar.bar_inner.next_btn))
             .clicked(actions)
             || self
                 .view
                 .button(cx, ids!(reader_bg.content_tap.end_nav.next_button2))
                 .clicked(actions);
         if next {
-            with_state_mut(|s| {
-                s.reader_next_chapter();
-            });
-            cx.action(AppAction::StateChanged);
+            self.next_chapter(cx);
             return;
         }
         let prev = self
             .view
-            .button(cx, ids!(bottom_bar.bar_inner.prev_button))
+            .rm_tap(cx, ids!(bottom_bar.bar_inner.prev_btn))
             .clicked(actions)
             || self
                 .view
                 .button(cx, ids!(reader_bg.content_tap.end_nav.prev_button2))
                 .clicked(actions);
         if prev {
-            with_state_mut(|s| {
-                s.reader_prev_chapter();
-            });
-            cx.action(AppAction::StateChanged);
+            self.prev_chapter(cx);
             return;
         }
 
-        // Tap the text area to toggle the controls overlay.
+        // Tap text area to toggle controls.
         if self
             .view
             .rm_tap(cx, ids!(reader_bg.content_tap))
@@ -401,17 +526,52 @@ impl WidgetMatchEvent for ReaderScreen {
             cx.action(AppAction::StateChanged);
         }
 
-        // Settings panel toggle.
+        // Scrubber — jump to chapter.
         if self
             .view
-            .button(cx, ids!(top_bar.settings_button))
+            .rm_vertical_slider(cx, ids!(scrubber.scrub_inner.scrub_slider))
+            .changed(actions)
+        {
+            let val = self
+                .view
+                .rm_vertical_slider(cx, ids!(scrubber.scrub_inner.scrub_slider))
+                .get_value();
+            let target_idx = val.round() as usize;
+            let s = state();
+            if let Some((novel_id, _)) = s.reader.current {
+                let order = s.reading_order(&novel_id);
+                if let Some(chapter_id) = order.get(target_idx) {
+                    with_state_mut(|s| {
+                        s.open_chapter(novel_id, *chapter_id);
+                    });
+                    cx.action(AppAction::StateChanged);
+                }
+            }
+        }
+
+        // Settings panel toggle via textsize button.
+        if self
+            .view
+            .rm_tap(cx, ids!(bottom_bar.bar_inner.textsize_btn))
             .clicked(actions)
         {
             self.panel_open = !self.panel_open;
             cx.action(AppAction::StateChanged);
         }
 
-        // Typography controls (also persisted into AppSettings).
+        // Gear button (dismiss settings or future action).
+        if self
+            .view
+            .rm_tap(cx, ids!(bottom_bar.bar_inner.gear_btn))
+            .clicked(actions)
+        {
+            if self.panel_open {
+                self.panel_open = false;
+                cx.action(AppAction::StateChanged);
+            }
+        }
+
+        // Typography controls.
         if self
             .view
             .button(cx, ids!(settings_panel.font_inc))
@@ -457,7 +617,6 @@ impl WidgetMatchEvent for ReaderScreen {
             cx.action(AppAction::StateChanged);
         }
 
-        // Reader themes.
         for (path, theme) in [
             (ids!(settings_panel.theme_dark), ReaderTheme::Dark),
             (ids!(settings_panel.theme_light), ReaderTheme::Light),
@@ -472,7 +631,6 @@ impl WidgetMatchEvent for ReaderScreen {
             }
         }
 
-        // Immersive mode.
         if let Some(immersive) = self
             .view
             .check_box(cx, ids!(settings_panel.immersive_check))

@@ -28,6 +28,21 @@ script_mod! {
         }
     }
 
+    mod.widgets.RmVerticalSlider = #(RmVerticalSlider::register_widget(vm)){
+        width: 12 height: Fill
+        draw_track +: {
+            color: #xffffff11
+            border_radius: 6.0
+        }
+        draw_thumb +: {
+            color: theme.color_highlight
+            border_radius: 4.0
+        }
+        value: 0.0
+        min_val: 0.0
+        max_val: 1.0
+    }
+
     // A clickable view: emits RmTapAction::Clicked on tap. Used as the root
     // of cards, chapter rows and other tappable list items. Children with
     // their own hit handling (checkboxes, buttons) still work — a captured
@@ -91,6 +106,40 @@ script_mod! {
     mod.widgets.IconAlert = Vector{width: 28 height: 28 viewbox: vec4(0 0 24 24)
         Path{d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill: false stroke: theme.color_error stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
         Path{d: "M12 9v4M12 17h.01" fill: false stroke: theme.color_error stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconFilter = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M22 3H2l8 9.46V19l4 2v-8.54z" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconSort = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M11 5h10M11 9h7M11 13h4" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+        Path{d: "M3 4v16M7 8l-4-4-4 4" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconBookmark = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconBookmarkFill = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" fill: theme.color_label_inner stroke: theme.color_label_inner stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconPrev = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M15 18l-6-6 6-6" fill: false stroke: theme.color_label_inner stroke_width: 2.2 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconNext = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M9 18l6-6-6-6" fill: false stroke: theme.color_label_inner stroke_width: 2.2 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconAa = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M11 4H4M18 20H3M8.5 4L3 20M21 11.5L20 8l-1 3.5M20 8l1.5 6M17 20l-1.2-4M14 20l1.5-6M17.5 16H20" fill: false stroke: theme.color_label_inner stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+        Path{d: "M3 12h5.5" fill: false stroke: theme.color_label_inner stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconTranslate = Vector{width: 20 height: 20 viewbox: vec4(0 0 24 24)
+        Path{d: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+        Path{d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+        Path{d: "M2 12h20" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconPin = Vector{width: 18 height: 18 viewbox: vec4(0 0 24 24)
+        Path{d: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" fill: theme.color_highlight stroke: theme.color_highlight stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
+    }
+    mod.widgets.IconPinOutline = Vector{width: 18 height: 18 viewbox: vec4(0 0 24 24)
+        Path{d: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" fill: false stroke: theme.color_label_inner_inactive stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
     }
 
     // ---- buttons ----------------------------------------------------------------
@@ -183,6 +232,21 @@ script_mod! {
             width: Fill height: 150
             flow: Overlay
             cover := RmCover{}
+            unread_badge := RoundedView{
+                width: Fit height: Fit
+                align: Align{x: 0.0 y: 0.0}
+                margin: Inset{left: 6.0 top: 6.0}
+                padding: Inset{left: 6.0 right: 6.0 top: 2.0 bottom: 2.0}
+                show_bg: true
+                visible: false
+                draw_bg.color: #x000000b3
+                draw_bg.border_radius: 10.0
+                badge_label := Label{
+                    text: "0"
+                    draw_text.color: #xfff
+                    draw_text.text_style: theme.font_bold{font_size: theme.font_size_code}
+                }
+            }
             progress_wrap := View{
                 width: Fill height: Fill
                 align: Align{x: 0.0 y: 1.0}
@@ -548,6 +612,57 @@ script_mod! {
         }
     }
 
+    // ---- source row (Browse screen) ------------------------------------------------------------------
+
+    mod.widgets.RmSourceRow = View{
+        width: Fill height: Fit
+        flow: Right spacing: theme.space_2
+        align: Align{y: 0.5}
+        padding: theme.mspace_2{left: theme.space_3, right: theme.space_3}
+        new_batch: true
+        source_logo := RoundedView{
+            width: 36 height: 36
+            draw_bg.color: theme.color_bg_highlight
+            draw_bg.border_radius: 8.0
+            source_initial := Label{
+                width: Fill height: Fill
+                align: Center
+                text: "M"
+                draw_text.color: theme.color_label_inner_inactive
+                draw_text.text_style: theme.font_bold{font_size: theme.font_size_4}
+            }
+        }
+        texts := View{
+            width: Fill height: Fit
+            flow: Down spacing: 1
+            source_name := Label{
+                width: Fill
+                text: "Source"
+                draw_text.color: theme.color_label_inner
+                draw_text.text_style: theme.font_bold{font_size: theme.font_size_p}
+            }
+            source_lang := Label{
+                width: Fill
+                text: ""
+                draw_text.color: theme.color_label_inner_inactive
+                draw_text.text_style.font_size: theme.font_size_code
+            }
+        }
+        browse_tap := RmTap{
+            width: Fit height: Fit
+            cursor: MouseCursor.Hand
+            show_bg: false
+            browse_link := Label{
+                text: "Browse"
+                draw_text.color: theme.color_highlight
+                draw_text.text_style: theme.font_bold{font_size: theme.font_size_p}
+            }
+        }
+        pin_icon := View{
+            width: 20 height: 20
+        }
+    }
+
     // ---- search field ------------------------------------------------------------------------------
 
     mod.widgets.RmTextInput = mod.widgets.TextInput{
@@ -786,6 +901,102 @@ impl RmChipRef {
     pub fn clicked(&self, actions: &Actions) -> bool {
         if let Some(item) = actions.find_widget_action(self.widget_uid()) {
             return matches!(item.cast(), RmChipAction::Clicked);
+        }
+        false
+    }
+}
+
+/// Actions emitted by [`RmVerticalSlider`].
+#[derive(Clone, Debug, Default)]
+pub enum RmVerticalSliderAction {
+    #[default]
+    None,
+    /// The slider value changed (new value in `0.0..=1.0`).
+    Changed,
+}
+
+/// A vertical scrubber slider for the reader chapter position indicator.
+#[derive(Script, ScriptHook, Widget)]
+pub struct RmVerticalSlider {
+    #[source]
+    source: ScriptObjectRef,
+    #[deref]
+    view: View,
+    #[redraw]
+    #[live]
+    draw_track: DrawQuad,
+    #[redraw]
+    #[live]
+    draw_thumb: DrawQuad,
+    #[live]
+    value: f32,
+    #[live]
+    min_val: f32,
+    #[live]
+    max_val: f32,
+}
+
+impl Widget for RmVerticalSlider {
+    fn handle_event(&mut self, cx: &mut Cx, event: &Event, _scope: &mut Scope) {
+        let area = self.draw_track.area();
+        match event.hits(cx, area) {
+            Hit::FingerDown(fe) => {
+                let rel_y = ((fe.abs.y - fe.rect.pos.y) / fe.rect.size.y) as f32;
+                self.value = self.min_val + rel_y * (self.max_val - self.min_val);
+                self.value = self.value.clamp(self.min_val, self.max_val);
+                cx.widget_action(self.widget_uid(), RmVerticalSliderAction::Changed);
+            }
+            Hit::FingerUp(fe) if fe.is_over => {
+                let rel_y = ((fe.abs.y - fe.rect.pos.y) / fe.rect.size.y) as f32;
+                self.value = self.min_val + rel_y * (self.max_val - self.min_val);
+                self.value = self.value.clamp(self.min_val, self.max_val);
+                cx.widget_action(self.widget_uid(), RmVerticalSliderAction::Changed);
+            }
+            _ => {}
+        }
+        self.view.handle_event(cx, event, _scope);
+    }
+
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+        let rect = cx.peek_walk_turtle(walk);
+        self.draw_track.draw_abs(cx, rect);
+        let fraction = if (self.max_val - self.min_val).abs() > 0.001 {
+            ((self.value - self.min_val) / (self.max_val - self.min_val)).clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
+        let thumb_size = 8.0f64;
+        let thumb_y = rect.pos.y + (rect.size.y - thumb_size) * fraction as f64;
+        let thumb_rect = Rect {
+            pos: dvec2(rect.pos.x, thumb_y),
+            size: dvec2(rect.size.x, thumb_size),
+        };
+        self.draw_thumb.draw_abs(cx, thumb_rect);
+        self.view.draw_walk(cx, scope, walk)
+    }
+}
+
+impl RmVerticalSliderRef {
+    pub fn set_range(&self, _cx: &mut Cx, min: f32, max: f32) {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.min_val = min;
+            inner.max_val = max;
+        }
+    }
+
+    pub fn set_value(&self, _cx: &mut Cx, value: f32) {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.value = value.clamp(inner.min_val, inner.max_val);
+        }
+    }
+
+    pub fn get_value(&self) -> f32 {
+        self.borrow().map(|b| b.value).unwrap_or(0.0)
+    }
+
+    pub fn changed(&self, actions: &Actions) -> bool {
+        if let Some(item) = actions.find_widget_action(self.widget_uid()) {
+            return matches!(item.cast(), RmVerticalSliderAction::Changed);
         }
         false
     }
