@@ -1,15 +1,17 @@
 [workspace]
 members = [
-  "crates/ln-core",
-  "crates/ln-store",
-  "crates/ln-plugin",
-  "crates/ln-net",
-  "crates/ln-transport",
-  "crates/ln-metalink",
-  "crates/ln-sync",
-  "crates/ln-daemon",
-  "crates/ln-rpc",
-  "crates/ln-ui",
+  "crates/readmesh-core",
+  "crates/readmesh-store",
+  "crates/readmesh-plugin",
+  "crates/readmesh-net",
+  "crates/readmesh-transport",
+  "crates/readmesh-metalink",
+  "crates/readmesh-sync",
+  "crates/readmesh-daemon",
+  "crates/readmesh-rpc",
+  "crates/readmesh-app",
+  "crates/readmesh-cli",
+  "crates/readmesh-ui",
 ]
 resolver = "2"
 
@@ -17,7 +19,7 @@ resolver = "2"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/lnreader-rs/lnreader-rs"
+repository = "https://github.com/readmesh/readmesh"
 rust-version = "1.83"
 
 [workspace.dependencies]
@@ -53,16 +55,21 @@ time = "0.3"
 bytes = "1"
 
 # internal crates
-ln-core = { path = "crates/ln-core" }
-ln-store = { path = "crates/ln-store" }
-ln-plugin = { path = "crates/ln-plugin" }
-ln-net = { path = "crates/ln-net" }
-ln-transport = { path = "crates/ln-transport" }
-ln-metalink = { path = "crates/ln-metalink" }
-ln-sync = { path = "crates/ln-sync" }
-ln-rpc = { path = "crates/ln-rpc" }
-ln-daemon = { path = "crates/ln-daemon" }
-ln-ui = { path = "crates/ln-ui" }
+readmesh-core = { path = "crates/readmesh-core" }
+readmesh-store = { path = "crates/readmesh-store" }
+readmesh-plugin = { path = "crates/readmesh-plugin" }
+readmesh-net = { path = "crates/readmesh-net" }
+readmesh-transport = { path = "crates/readmesh-transport" }
+readmesh-metalink = { path = "crates/readmesh-metalink" }
+readmesh-sync = { path = "crates/readmesh-sync" }
+readmesh-rpc = { path = "crates/readmesh-rpc" }
+readmesh-daemon = { path = "crates/readmesh-daemon" }
+readmesh-app = { path = "crates/readmesh-app" }
+readmesh-cli = { path = "crates/readmesh-cli" }
+readmesh-ui = { path = "crates/readmesh-ui" }
+
+# UI (pinned Makepad 2.0 dev branch)
+makepad-widgets = { git = "https://github.com/makepad/makepad.git", rev = "b41e7404b6bb893d32f7d2924cd7b1c28983547f" }
 
 [profile.release]
 lto = "thin"

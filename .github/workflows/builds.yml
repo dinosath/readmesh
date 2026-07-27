@@ -1,0 +1,123 @@
+name: Release Builds
+
+# Builds the ReadMesh release artifacts for Android, Windows, Linux and
+# macOS. Called by release.yml for tagged releases; also runs on main so
+# every commit produces downloadable artifacts.
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+  # Pinned Makepad revision (must match Cargo.toml's makepad-widgets dep).
+  MAKEPAD_REPO: https://github.com/makepad/makepad.git
+  MAKEPAD_REV: b41e7404b6bb893d32f7d2924cd7b1c28983547f
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libxkbcommon-dev libwayland-dev libpango1.0-dev libx11-xcb-dev libxcb-dri2-0-dev libxcb-xfixes0-dev libxcb-present-dev libxcb-sync-dev libxshmfence-dev libgl1-mesa-dev libx11-dev libxcursor-dev libasound2-dev libpulse-dev libssl-dev
+      - name: Build release binaries
+        run: cargo build --release -p readmesh-ui -p readmesh-cli -p readmesh-daemon
+      - name: Package
+        run: |
+          mkdir -p dist/readmesh-linux-x86_64
+          cp target/release/readmesh target/release/readmesh-cli target/release/readmeshd dist/readmesh-linux-x86_64/
+          tar -C dist -czf readmesh-linux-x86_64.tar.gz readmesh-linux-x86_64
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: readmesh-linux-x86_64
+          path: readmesh-linux-x86_64.tar.gz
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build release binaries
+        run: cargo build --release -p readmesh-ui -p readmesh-cli -p readmesh-daemon
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p dist/readmesh-windows-x86_64
+          cp target/release/readmesh.exe target/release/readmesh-cli.exe target/release/readmeshd.exe dist/readmesh-windows-x86_64/
+          cd dist && zip -r ../readmesh-windows-x86_64.zip readmesh-windows-x86_64
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: readmesh-windows-x86_64
+          path: readmesh-windows-x86_64.zip
+
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build release binaries
+        run: cargo build --release -p readmesh-ui -p readmesh-cli -p readmesh-daemon
+      - name: Assemble ReadMesh.app bundle
+        run: |
+          APP=dist/ReadMesh.app/Contents
+          mkdir -p "$APP/MacOS" "$APP/Resources"
+          cp target/release/readmesh "$APP/MacOS/ReadMesh"
+          cat > "$APP/Info.plist" <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key><string>ReadMesh</string>
+            <key>CFBundleDisplayName</key><string>ReadMesh</string>
+            <key>CFBundleIdentifier</key><string>dev.readmesh.app</string>
+            <key>CFBundleExecutable</key><string>ReadMesh</string>
+            <key>CFBundleVersion</key><string>0.1.0</string>
+            <key>CFBundleShortVersionString</key><string>0.1.0</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict>
+          </plist>
+          EOF
+          mkdir -p dist/readmesh-macos
+          cp target/release/readmesh-cli target/release/readmeshd dist/readmesh-macos/
+          cd dist && zip -r ../readmesh-macos-aarch64.zip ReadMesh.app readmesh-macos
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: readmesh-macos-aarch64
+          path: readmesh-macos-aarch64.zip
+
+  android:
+    name: Android (APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-makepad (pinned Makepad revision)
+        run: cargo install --force --git "$MAKEPAD_REPO" --rev "$MAKEPAD_REV" cargo-makepad
+      - name: Install Android toolchain
+        run: cargo makepad android install-toolchain --full-ndk
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: android-build-${{ hashFiles('Cargo.lock') }}
+      - name: Build Android APK (release)
+        run: cargo makepad android build -p readmesh-ui --release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: readmesh-android-apk
+          path: target/makepad-android-apk/**/apk/*.apk

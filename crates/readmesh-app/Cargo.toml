@@ -1,0 +1,13 @@
+[package]
+name = "readmesh-app"
+description = "ReadMesh application state, navigation, and domain services (UI-agnostic)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+readmesh-core = { workspace = true }
+blake3 = { workspace = true }
+chrono = { workspace = true }

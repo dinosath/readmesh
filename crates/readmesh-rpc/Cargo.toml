@@ -1,0 +1,12 @@
+[package]
+name = "readmesh-rpc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+readmesh-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+bytes.workspace = true

@@ -1,0 +1,29 @@
+[package]
+name = "readmesh-ui"
+description = "ReadMesh — a mesh-native reader application (Makepad UI)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "readmesh"
+path = "src/main.rs"
+
+[dependencies]
+readmesh-core.workspace = true
+readmesh-app.workspace = true
+makepad-widgets.workspace = true
+
+[dev-dependencies]
+makepad-test = { git = "https://github.com/makepad/makepad.git", rev = "b41e7404b6bb893d32f7d2924cd7b1c28983547f" }
+
+# Packaging metadata consumed by `cargo makepad` (Android/desktop):
+# product_name -> app label, identifier -> Android package name.
+[package.metadata.packager]
+product_name = "ReadMesh"
+identifier = "dev.readmesh.app"
+
+[package.metadata.makepad.android]
+version_code = "auto"

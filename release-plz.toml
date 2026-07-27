@@ -2,41 +2,49 @@
 release = true
 
 [[package]]
-name = "ln-core"
+name = "readmesh-core"
 publish = false
 
 [[package]]
-name = "ln-store"
+name = "readmesh-store"
 publish = false
 
 [[package]]
-name = "ln-plugin"
+name = "readmesh-plugin"
 publish = false
 
 [[package]]
-name = "ln-net"
+name = "readmesh-net"
 publish = false
 
 [[package]]
-name = "ln-transport"
+name = "readmesh-transport"
 publish = false
 
 [[package]]
-name = "ln-metalink"
+name = "readmesh-metalink"
 publish = false
 
 [[package]]
-name = "ln-sync"
+name = "readmesh-sync"
 publish = false
 
 [[package]]
-name = "ln-daemon"
+name = "readmesh-daemon"
 publish = false
 
 [[package]]
-name = "ln-rpc"
+name = "readmesh-rpc"
 publish = false
 
 [[package]]
-name = "ln-ui"
+name = "readmesh-app"
+publish = false
+
+[[package]]
+name = "readmesh-cli"
+publish = false
+
+[[package]]
+name = "readmesh-ui"
 publish = false
