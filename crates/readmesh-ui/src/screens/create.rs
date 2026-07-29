@@ -1,12 +1,14 @@
 use makepad_widgets::*;
 
 script_mod! {
+    use mod.prelude.widgets.*
+    use mod.widgets.*
+
     mod.widgets.CreateNovelScreen = #(CreateNovelScreen::register_widget(vm)){
         width: Fill height: Fill
         flow: Down spacing: theme.space_3
         padding: theme.mspace_3
-        show_bg: true
-        draw_bg: {color: theme.color_bg_app}
+        draw_bg.color: theme.color_bg_app
         header := Label{
             width: Fill height: Fit
             text: "Create Novel"

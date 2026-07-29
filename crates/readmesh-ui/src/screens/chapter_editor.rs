@@ -1,11 +1,13 @@
 use makepad_widgets::*;
 
 script_mod! {
+    use mod.prelude.widgets.*
+    use mod.widgets.*
+
     mod.widgets.ChapterEditorScreen = #(ChapterEditorScreen::register_widget(vm)){
         width: Fill height: Fill
-        show_bg: true
-        draw_bg: {color: theme.color_bg_app}
         flow: Down
+        draw_bg.color: theme.color_bg_app
         body := Label{width: Fill height: Fill align: Center text: "Chapter Editor" draw_text.color: theme.color_label_inner_inactive}
     }
 }

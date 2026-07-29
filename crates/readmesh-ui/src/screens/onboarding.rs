@@ -4,13 +4,15 @@ use crate::app::AppAction;
 use crate::state::with_state_mut;
 
 script_mod! {
+    use mod.prelude.widgets.*
+    use mod.widgets.*
+
     mod.widgets.OnboardingScreen = #(OnboardingScreen::register_widget(vm)){
         width: Fill height: Fill
         flow: Down spacing: 20
         padding: 40
         align: Center
-        show_bg: true
-        draw_bg: {color: theme.color_bg_app}
+        draw_bg.color: theme.color_bg_app
 
         title_label := Label{
             width: Fit height: Fit
@@ -20,7 +22,7 @@ script_mod! {
         }
         done_button := RmPrimaryButton{
             width: Fill height: 48
-            label: "Get Started"
+            text: "Get Started"
         }
     }
 }
