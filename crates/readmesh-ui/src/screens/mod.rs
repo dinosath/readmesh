@@ -6,12 +6,22 @@
 //! order.
 
 pub mod browse;
+pub mod chapter_editor;
+pub mod collaborative;
+pub mod cover_studio;
+pub mod create;
 pub mod detail;
+pub mod discover;
 pub mod downloads;
+pub mod import;
 pub mod library;
+pub mod metadata_editor;
+pub mod onboarding;
+pub mod peer_connections;
 pub mod reader;
 pub mod search;
 pub mod settings;
+pub mod sync_dashboard;
 
 use makepad_widgets::*;
 use readmesh_app::{AppState, ContentRepository, NavMode};
@@ -23,11 +33,21 @@ use crate::components::{RmCoverWidgetRefExt, RmProgressBarWidgetRefExt, RmTapWid
 pub fn script_mod(vm: &mut ScriptVm) {
     crate::screens::library::script_mod(vm);
     crate::screens::browse::script_mod(vm);
+    crate::screens::discover::script_mod(vm);
     crate::screens::search::script_mod(vm);
     crate::screens::detail::script_mod(vm);
     crate::screens::downloads::script_mod(vm);
     crate::screens::reader::script_mod(vm);
     crate::screens::settings::script_mod(vm);
+    crate::screens::onboarding::script_mod(vm);
+    crate::screens::create::script_mod(vm);
+    crate::screens::metadata_editor::script_mod(vm);
+    crate::screens::cover_studio::script_mod(vm);
+    crate::screens::import::script_mod(vm);
+    crate::screens::chapter_editor::script_mod(vm);
+    crate::screens::collaborative::script_mod(vm);
+    crate::screens::peer_connections::script_mod(vm);
+    crate::screens::sync_dashboard::script_mod(vm);
 }
 
 /// One row in a sectioned card-grid screen.

@@ -43,6 +43,8 @@ pub struct FollowedPeer {
 /// Federation status information for the node.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FederationStatus {
+    /// This node's ID (hex string).
+    pub node_id: String,
     /// Local mirror config.
     pub mirror_config: MirrorConfig,
     /// Peers we follow.

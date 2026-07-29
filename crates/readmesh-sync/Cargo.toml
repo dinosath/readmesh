@@ -6,13 +6,25 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-readmesh-core.workspace = true
 readmesh-net.workspace = true
+readmesh-core.workspace = true
 serde.workspace = true
 tokio.workspace = true
 thiserror.workspace = true
 chrono.workspace = true
 tracing.workspace = true
+iroh.workspace = true
+iroh-blobs.workspace = true
+iroh-gossip.workspace = true
+iroh-docs.workspace = true
+blake3.workspace = true
+postcard = "1"
+tokio-stream = "0.1"
+
+[features]
+default = []
+iroh-docs = []
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["macros"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tempfile = "3"

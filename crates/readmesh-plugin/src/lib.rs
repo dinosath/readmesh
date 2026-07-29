@@ -10,9 +10,11 @@ use readmesh_core::source::PluginManifest;
 
 mod host;
 mod reference;
+mod wasm_host;
 
 pub use host::PluginHost;
 pub use reference::ReferencePlugin;
+pub use wasm_host::{DeclarativeScraper, ScraperManifest, ScraperSelectors, WasmPlugin};
 
 /// Result type for plugin operations.
 pub type PluginResult<T> = Result<T, PluginError>;

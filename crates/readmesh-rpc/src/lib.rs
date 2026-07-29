@@ -10,7 +10,6 @@ use readmesh_core::source::PluginManifest;
 use serde::{Deserialize, Serialize};
 
 /// Core RPC service definition.
-/// In the future this will use quic-rpc or tonic for the actual transport.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RpcRequest {
     // Library
@@ -63,6 +62,18 @@ pub enum RpcRequest {
         manifest: PluginManifest,
     },
 
+    // Authoring
+    CreateProject {
+        title: String,
+    },
+    LoadProject {
+        data: Vec<u8>,
+    },
+    ImportFromSource {
+        plugin_id: String,
+        url: String,
+    },
+
     // Network/Peers
     GetPeers,
     GetNodeId,
@@ -98,6 +109,10 @@ pub enum RpcResponse {
 
     // Plugins
     Plugins { plugins: Vec<PluginManifest> },
+
+    // Authoring
+    ProjectData { data: Vec<u8> },
+    ProjectInfo { title: String, chapters: usize },
 
     // Network
     Peers { peer_ids: Vec<String> },

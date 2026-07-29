@@ -9,6 +9,7 @@ members = [
   "crates/readmesh-sync",
   "crates/readmesh-daemon",
   "crates/readmesh-rpc",
+  "crates/readmesh-authoring",
   "crates/readmesh-app",
   "crates/readmesh-cli",
   "crates/readmesh-ui",
@@ -20,7 +21,7 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/readmesh/readmesh"
-rust-version = "1.83"
+rust-version = "1.94"
 
 [workspace.dependencies]
 # async
@@ -56,6 +57,7 @@ bytes = "1"
 
 # internal crates
 readmesh-core = { path = "crates/readmesh-core" }
+readmesh-authoring = { path = "crates/readmesh-authoring" }
 readmesh-store = { path = "crates/readmesh-store" }
 readmesh-plugin = { path = "crates/readmesh-plugin" }
 readmesh-net = { path = "crates/readmesh-net" }
@@ -70,6 +72,24 @@ readmesh-ui = { path = "crates/readmesh-ui" }
 
 # UI (pinned Makepad 2.0 dev branch)
 makepad-widgets = { git = "https://github.com/makepad/makepad.git", rev = "b41e7404b6bb893d32f7d2924cd7b1c28983547f" }
+
+# iroh P2P stack (v1.0 ecosystem)
+iroh = { version = "1", default-features = false }
+iroh-blobs = "0.103"
+iroh-gossip = "0.101"
+iroh-docs = "0.101"
+
+# CRDT collaborative editing
+loro = "1"
+
+# WASM plugin runtime
+wasmtime = "47"
+
+# HTML parsing & CSS selectors (declarative scraping)
+scraper = { version = "0.27", features = ["atomic"] }
+
+# URL parsing
+url = "2"
 
 [profile.release]
 lto = "thin"

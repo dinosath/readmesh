@@ -277,6 +277,56 @@ pub async fn cmd_unfollow_peer(client: &DaemonClient, node_id_hex: &str) -> anyh
     Ok(())
 }
 
+/// Create a new novel project via the authoring crate.
+pub async fn cmd_create_project(client: &DaemonClient, title: &str) -> anyhow::Result<()> {
+    match client.request(RpcRequest::CreateProject {
+        title: title.to_string(),
+    })
+    .await
+    {
+        RpcResponse::ProjectData { data } => {
+            println!("Created project '{title}' ({} bytes CRDT data)", data.len());
+        }
+        RpcResponse::Error { message } => {
+            eprintln!("Error: {message}");
+        }
+        _ => {
+            eprintln!("Unexpected response");
+        }
+    }
+    Ok(())
+}
+
+/// Import a novel from a website using a plugin.
+pub async fn cmd_import(
+    client: &DaemonClient,
+    plugin_id: &str,
+    url: &str,
+) -> anyhow::Result<()> {
+    println!("Importing from {url} using plugin '{plugin_id}'...");
+    match client
+        .request(RpcRequest::ImportFromSource {
+            plugin_id: plugin_id.to_string(),
+            url: url.to_string(),
+        })
+        .await
+    {
+        RpcResponse::Novel { novel: Some(n) } => {
+            println!("Imported: {} ({})", n.title, n.id);
+        }
+        RpcResponse::Novel { novel: None } => {
+            eprintln!("Novel not found at {url}");
+        }
+        RpcResponse::Error { message } => {
+            eprintln!("Error: {message}");
+        }
+        _ => {
+            eprintln!("Unexpected response");
+        }
+    }
+    Ok(())
+}
+
 /// Simple HTML tag stripper.
 fn strip_html(html: &str) -> String {
     let mut result = String::with_capacity(html.len());

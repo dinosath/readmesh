@@ -1,10 +1,12 @@
 use std::sync::Arc;
 
+use readmesh_authoring::AuthoringProject;
 use readmesh_core::federation::{FederationStatus, FollowedPeer};
 use readmesh_core::id::{ChapterId, NodeId, NovelId, PluginId};
 use readmesh_core::library::Library;
 use readmesh_core::novel::Novel;
 use readmesh_core::source::PluginManifest;
+use readmesh_net::{NetConfig, NetNode};
 use readmesh_plugin::PluginHost;
 use readmesh_plugin::ReferencePlugin;
 use readmesh_rpc::{RpcRequest, RpcResponse};
@@ -17,11 +19,20 @@ pub struct DaemonService {
     library: tokio::sync::RwLock<Library>,
     device_id: NodeId,
     federation: tokio::sync::RwLock<FederationStatus>,
+    net_node: Option<Arc<NetNode<readmesh_net::InMemoryBackend>>>,
 }
 
 impl DaemonService {
     /// Create a new daemon service backed by the given data directory.
     pub async fn new(data_dir: &std::path::Path) -> anyhow::Result<Self> {
+        Self::with_net(data_dir, None).await
+    }
+
+    /// Create a daemon service with optional P2P networking.
+    pub async fn with_net(
+        data_dir: &std::path::Path,
+        _net_config: Option<NetConfig>,
+    ) -> anyhow::Result<Self> {
         let store = Arc::new(Store::open(data_dir)?);
 
         // Register the reference plugin
@@ -44,8 +55,17 @@ impl DaemonService {
         let novel_count = library.novel_count();
         tracing::info!("Loaded {novel_count} novels from store");
 
-        // Placeholder: net node not started yet
-        let device_id = NodeId([0u8; 32]);
+        // Start the network backend
+        let local_alias = format!("readmesh-{}", data_dir.file_name().unwrap_or_default().to_string_lossy());
+        let hash = blake3::hash(local_alias.as_bytes());
+        let device_id = NodeId::from_bytes(*hash.as_bytes());
+        let (net_node, device_id) = {
+            let backend = readmesh_net::InMemoryBackend::new(device_id);
+            let backend_ref = Arc::new(backend);
+            let node = NetNode::new(backend_ref).await?;
+            let id = node.node_id();
+            (Some(node), id)
+        };
 
         Ok(Self {
             store,
@@ -53,6 +73,7 @@ impl DaemonService {
             library: tokio::sync::RwLock::new(library),
             device_id,
             federation: tokio::sync::RwLock::new(FederationStatus::default()),
+            net_node,
         })
     }
 
@@ -66,13 +87,11 @@ impl DaemonService {
             }
             RpcRequest::AddNovel { novel } => {
                 let id = novel.id;
-                // Persist to store
                 if let Err(e) = self.store.insert_novel(&novel) {
                     return RpcResponse::Error {
                         message: format!("failed to insert novel: {e}"),
                     };
                 }
-                // Update in-memory library
                 {
                     let mut lib = self.library.write().await;
                     lib.add_novel(novel);
@@ -122,13 +141,24 @@ impl DaemonService {
                 if let Some(cid) = bytes_to_chapter_id(&chapter_id) {
                     let lib = self.library.read().await;
                     if let Some(chapter) = lib.get_chapter(&cid) {
+                        // Try local store first, then network
                         match self.store.get_blob(&chapter.content_hash).await {
                             Ok(Some(data)) => {
                                 return RpcResponse::ChapterContent { data };
                             }
                             Ok(None) => {
+                                // Fallback: try fetching from network peers
+                                if let Some(ref node) = self.net_node {
+                                    match node.get_blob(&chapter.content_hash).await {
+                                        Ok(Some(data)) => {
+                                            return RpcResponse::ChapterContent { data };
+                                        }
+                                        _ => {}
+                                    }
+                                }
                                 return RpcResponse::Error {
-                                    message: "chapter content not available locally".into(),
+                                    message: "chapter content not available locally or from peers"
+                                        .into(),
                                 };
                             }
                             Err(e) => {
@@ -216,12 +246,76 @@ impl DaemonService {
                 }
                 RpcResponse::Ok
             }
-            RpcRequest::GetPeers => RpcResponse::Peers { peer_ids: vec![] },
+
+            // Authoring
+            RpcRequest::CreateProject { title } => {
+                let project = AuthoringProject::new(&title);
+                match project.export() {
+                    Ok(data) => RpcResponse::ProjectData { data },
+                    Err(e) => RpcResponse::Error {
+                        message: e.to_string(),
+                    },
+                }
+            }
+            RpcRequest::LoadProject { data } => match AuthoringProject::load(&data) {
+                Ok(project) => {
+                    let title = project.get_title().unwrap_or_default();
+                    RpcResponse::ProjectInfo {
+                        title,
+                        chapters: project.chapters_len(),
+                    }
+                }
+                Err(e) => RpcResponse::Error {
+                    message: e.to_string(),
+                },
+            },
+            RpcRequest::ImportFromSource {
+                plugin_id,
+                url,
+            } => {
+                let pid = PluginId(plugin_id);
+                match self.plugin_host.fetch_novel(&pid, &url).await {
+                    Ok(novel) => {
+                        let id = novel.id;
+                        if let Err(e) = self.store.insert_novel(&novel) {
+                            return RpcResponse::Error {
+                                message: format!("failed to persist novel: {e}"),
+                            };
+                        }
+                        {
+                            let mut lib = self.library.write().await;
+                            lib.add_novel(novel);
+                        }
+                        let result = {
+                            let lib = self.library.read().await;
+                            lib.get_novel(&id).cloned()
+                        };
+                        RpcResponse::Novel { novel: result }
+                    }
+                    Err(e) => RpcResponse::Error {
+                        message: e.to_string(),
+                    },
+                }
+            }
+
+            // Network/Peers
+            RpcRequest::GetPeers => {
+                let peer_ids = self
+                    .federation
+                    .read()
+                    .await
+                    .followed_peers
+                    .iter()
+                    .map(|p| p.node_id.to_string())
+                    .collect();
+                RpcResponse::Peers { peer_ids }
+            }
             RpcRequest::GetNodeId => RpcResponse::NodeId {
                 node_id: self.device_id.as_bytes().to_vec(),
             },
             RpcRequest::GetFederationStatus => {
-                let status = self.federation.read().await.clone();
+                let mut status = self.federation.read().await.clone();
+                status.node_id = self.device_id.to_string();
                 RpcResponse::FederationStatus { status }
             }
             RpcRequest::SetMirrorConfig { config } => {
@@ -260,6 +354,11 @@ impl DaemonService {
                 }
             }
         }
+    }
+
+    /// Access the network node for blob operations.
+    pub fn net_node(&self) -> Option<&Arc<NetNode<readmesh_net::InMemoryBackend>>> {
+        self.net_node.as_ref()
     }
 }
 

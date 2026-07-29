@@ -4,8 +4,8 @@ mod commands;
 use clap::{Parser, Subcommand};
 use client::DaemonClient;
 use commands::{
-    cmd_chapters, cmd_daemon, cmd_federation, cmd_follow_peer, cmd_library, cmd_plugins, cmd_read,
-    cmd_search, cmd_unfollow_peer,
+    cmd_chapters, cmd_create_project, cmd_daemon, cmd_federation, cmd_follow_peer, cmd_import,
+    cmd_library, cmd_plugins, cmd_read, cmd_search, cmd_unfollow_peer,
 };
 
 #[derive(Parser)]
@@ -59,6 +59,18 @@ enum Command {
     },
     /// Show daemon info
     Daemon,
+    /// Create a new novel project
+    CreateProject {
+        /// Novel title
+        title: String,
+    },
+    /// Import a novel from a website
+    Import {
+        /// Plugin ID to use (e.g. "reference-plugin")
+        plugin_id: String,
+        /// Novel URL to import
+        url: String,
+    },
 }
 
 #[tokio::main]
@@ -107,6 +119,14 @@ async fn main() -> anyhow::Result<()> {
         Command::Unfollow { node_id } => {
             let client = DaemonClient::embed(&cli.data_dir).await?;
             cmd_unfollow_peer(&client, &node_id).await?;
+        }
+        Command::CreateProject { title } => {
+            let client = DaemonClient::embed(&cli.data_dir).await?;
+            cmd_create_project(&client, &title).await?;
+        }
+        Command::Import { plugin_id, url } => {
+            let client = DaemonClient::embed(&cli.data_dir).await?;
+            cmd_import(&client, &plugin_id, &url).await?;
         }
     }
 

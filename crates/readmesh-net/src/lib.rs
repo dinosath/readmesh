@@ -21,8 +21,14 @@ use tokio::sync::mpsc;
 mod backend;
 mod federation;
 
+#[cfg(feature = "iroh-backend")]
+mod iroh_backend;
+
 pub use backend::{InMemoryBackend, P2pBackend, P2pEvent};
 pub use federation::FederatedNode;
+
+#[cfg(feature = "iroh-backend")]
+pub use iroh_backend::IrohBackend;
 
 /// Configuration for the networking layer.
 #[derive(Debug, Clone)]

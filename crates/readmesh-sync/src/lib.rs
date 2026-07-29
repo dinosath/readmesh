@@ -9,6 +9,11 @@
 //! Last-write-wins by timestamp. The `updated_at` field on each message
 //! determines which version is newer.
 
+#[cfg(feature = "iroh-docs")]
+mod docs_backend;
+#[cfg(feature = "iroh-docs")]
+pub use docs_backend::{DocsBackend, SyncEvent};
+
 use std::collections::BTreeMap;
 
 use chrono::{DateTime, Utc};

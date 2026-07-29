@@ -6,8 +6,7 @@
 
 use readmesh_core::{ChapterId, NovelId};
 
-/// Primary destinations shown in the app shell (navigation rail on desktop,
-/// bottom navigation bar on mobile).
+/// Primary destinations shown in the app shell (bottom nav on mobile).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum PrimaryTab {
     Library,
@@ -30,7 +29,7 @@ impl PrimaryTab {
     pub fn title(self) -> &'static str {
         match self {
             PrimaryTab::Library => "Library",
-            PrimaryTab::Browse => "Browse",
+            PrimaryTab::Browse => "Discover",
             PrimaryTab::Search => "Search",
             PrimaryTab::Downloads => "Downloads",
             PrimaryTab::Settings => "Settings",
@@ -47,6 +46,24 @@ pub enum Route {
     NovelDetail(NovelId),
     /// Full-screen reader for a specific chapter.
     Reader { novel: NovelId, chapter: ChapterId },
+    /// Onboarding wizard (first-launch, full-screen modal).
+    Onboarding,
+    /// Create a new novel (authoring project).
+    CreateNovel,
+    /// Metadata editor for an existing novel.
+    MetadataEditor(NovelId),
+    /// Cover image studio.
+    CoverStudio(NovelId),
+    /// Import from website (declarative scraper or WASM plugin).
+    ImportFromWebsite,
+    /// Chapter editor (rich text CRDT editing).
+    ChapterEditor { novel: NovelId, chapter: ChapterId },
+    /// Collaborative workspace for co-authoring.
+    CollaborativeWorkspace(NovelId),
+    /// Peer connections / known nodes.
+    PeerConnections,
+    /// Sync dashboard (per-entity sync state).
+    SyncDashboard,
 }
 
 impl Route {
@@ -54,14 +71,28 @@ impl Route {
     pub fn tab(&self) -> Option<PrimaryTab> {
         match self {
             Route::Tab(tab) => Some(*tab),
-            Route::NovelDetail(_) | Route::Reader { .. } => None,
+            Route::NovelDetail(_)
+            | Route::Reader { .. }
+            | Route::MetadataEditor(_)
+            | Route::CoverStudio(_)
+            | Route::ChapterEditor { .. }
+            | Route::CollaborativeWorkspace(_) => None,
+            Route::Onboarding => Some(PrimaryTab::Library),
+            Route::CreateNovel => Some(PrimaryTab::Library),
+            Route::ImportFromWebsite => Some(PrimaryTab::Library),
+            Route::PeerConnections => Some(PrimaryTab::Settings),
+            Route::SyncDashboard => Some(PrimaryTab::Settings),
         }
     }
 
-    /// The reader is a distraction-free experience that hides the app chrome
-    /// (navigation rail / bottom bar).
+    /// Routes that hide the app chrome (navigation bar).
     pub fn hides_chrome(&self) -> bool {
-        matches!(self, Route::Reader { .. })
+        matches!(
+            self,
+            Route::Reader { .. }
+                | Route::Onboarding
+                | Route::ChapterEditor { .. }
+        )
     }
 }
 

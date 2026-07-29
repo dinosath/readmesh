@@ -18,8 +18,17 @@ chrono.workspace = true
 async-trait.workspace = true
 
 # iroh P2P stack
-iroh = "1"
+iroh = { workspace = true, features = ["tls-ring"] }
+iroh-blobs.workspace = true
+iroh-gossip.workspace = true
+n0-future = "0.3"
+postcard = "1"
+
+[features]
+default = ["iroh-backend"]
+iroh-backend = []
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["macros"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tracing-subscriber.workspace = true
+tempfile = "3"

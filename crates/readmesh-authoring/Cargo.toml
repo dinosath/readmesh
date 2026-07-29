@@ -1,5 +1,5 @@
 [package]
-name = "readmesh-plugin"
+name = "readmesh-authoring"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -7,19 +7,14 @@ repository.workspace = true
 
 [dependencies]
 readmesh-core.workspace = true
-async-trait.workspace = true
-thiserror.workspace = true
+loro.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-chrono.workspace = true
-bytes.workspace = true
-blake3.workspace = true
+thiserror.workspace = true
 tokio.workspace = true
-wasmtime.workspace = true
-scraper.workspace = true
-url.workspace = true
-reqwest = { version = "0.12", default-features = false }
-wat = "1"
+chrono.workspace = true
+blake3.workspace = true
+uuid.workspace = true
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros"] }

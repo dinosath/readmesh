@@ -183,6 +183,15 @@ script_mod! {
                 downloads_screen := DownloadsScreen{visible: false}
                 settings_screen := SettingsScreen{visible: false}
                 reader_screen := ReaderScreen{visible: false}
+                onboarding_screen := OnboardingScreen{visible: false}
+                create_novel_screen := CreateNovelScreen{visible: false}
+                metadata_editor_screen := MetadataEditorScreen{visible: false}
+                cover_studio_screen := CoverStudioScreen{visible: false}
+                import_screen := ImportScreen{visible: false}
+                chapter_editor_screen := ChapterEditorScreen{visible: false}
+                collaborative_screen := CollaborativeScreen{visible: false}
+                peer_connections_screen := PeerConnectionsScreen{visible: false}
+                sync_dashboard_screen := SyncDashboardScreen{visible: false}
             }
         }
 
@@ -398,10 +407,17 @@ impl AppShell {
 
         // Screen visibility.
         if route_changed {
-            for (screen_tab, path) in SCREENS {
-                self.view
-                    .view(cx, path)
-                    .set_visible(cx, route == Route::Tab(*screen_tab));
+            // Hide all screens first
+            for (_, path) in SCREENS {
+                self.view.view(cx, path).set_visible(cx, false);
+            }
+            // Show the matching tab screen
+            if let Route::Tab(pt) = route {
+                for (screen_tab, path) in SCREENS {
+                    self.view
+                        .view(cx, path)
+                        .set_visible(cx, *screen_tab == pt);
+                }
             }
             self.view
                 .view(cx, ids!(main_row.content_host.detail_screen))
@@ -409,6 +425,33 @@ impl AppShell {
             self.view
                 .view(cx, ids!(main_row.content_host.reader_screen))
                 .set_visible(cx, matches!(route, Route::Reader { .. }));
+            self.view
+                .view(cx, ids!(main_row.content_host.onboarding_screen))
+                .set_visible(cx, matches!(route, Route::Onboarding));
+            self.view
+                .view(cx, ids!(main_row.content_host.create_novel_screen))
+                .set_visible(cx, matches!(route, Route::CreateNovel));
+            self.view
+                .view(cx, ids!(main_row.content_host.metadata_editor_screen))
+                .set_visible(cx, matches!(route, Route::MetadataEditor(_)));
+            self.view
+                .view(cx, ids!(main_row.content_host.cover_studio_screen))
+                .set_visible(cx, matches!(route, Route::CoverStudio(_)));
+            self.view
+                .view(cx, ids!(main_row.content_host.import_screen))
+                .set_visible(cx, matches!(route, Route::ImportFromWebsite));
+            self.view
+                .view(cx, ids!(main_row.content_host.chapter_editor_screen))
+                .set_visible(cx, matches!(route, Route::ChapterEditor { .. }));
+            self.view
+                .view(cx, ids!(main_row.content_host.collaborative_screen))
+                .set_visible(cx, matches!(route, Route::CollaborativeWorkspace(_)));
+            self.view
+                .view(cx, ids!(main_row.content_host.peer_connections_screen))
+                .set_visible(cx, matches!(route, Route::PeerConnections));
+            self.view
+                .view(cx, ids!(main_row.content_host.sync_dashboard_screen))
+                .set_visible(cx, matches!(route, Route::SyncDashboard));
 
             // Nav selection follows the active tab.
             if let Route::Tab(_) = route {
