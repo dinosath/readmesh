@@ -27,10 +27,10 @@ script_mod! {
         light_text: #x232a33
         light_text_dim: #x6b7280
         // Shared brand accents
-        accent: #xe8a33d         // reading-lamp amber
+        accent: #xe8a33d
         accent_dim: #x9a6b24
-        accent_soft: #xe8a33d33
-        ok: #x4caf7d
+        accent_soft: #xe8a33d
+        color_ok: #x4caf7d
         err: #xe05d5d
         // Reader themes (reader screen backgrounds)
         reader_dark_bg: #x12161c

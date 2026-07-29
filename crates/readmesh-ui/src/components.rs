@@ -9,7 +9,7 @@
 use makepad_widgets::*;
 
 script_mod! {
-    use mod.prelude.widgets_internal.*
+    use mod.prelude.widgets.*
     use mod.widgets.*
 
     // ---- custom Rust widgets ------------------------------------------------
@@ -91,7 +91,7 @@ script_mod! {
         Path{d: "M18 6L6 18M6 6l12 12" fill: false stroke: theme.color_label_inner stroke_width: 2.2 stroke_linecap: "round" stroke_linejoin: "round"}
     }
     mod.widgets.IconCheck = Vector{width: 16 height: 16 viewbox: vec4(0 0 24 24)
-        Path{d: "M20 6L9 17l-5-5" fill: false stroke: mod.rm.ok stroke_width: 2.5 stroke_linecap: "round" stroke_linejoin: "round"}
+        Path{d: "M20 6L9 17l-5-5" fill: false stroke: mod.rm.color_ok stroke_width: 2.5 stroke_linecap: "round" stroke_linejoin: "round"}
     }
     mod.widgets.IconStar = Vector{width: 18 height: 18 viewbox: vec4(0 0 24 24)
         Path{d: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" fill: false stroke: theme.color_highlight stroke_width: 2.0 stroke_linecap: "round" stroke_linejoin: "round"}
@@ -231,7 +231,7 @@ script_mod! {
         cover_wrap := View{
             width: Fill height: 150
             flow: Overlay
-            cover := RmCover{}
+            cover := mod.widgets.RmCover{}
             unread_badge := RoundedView{
                 width: Fit height: Fit
                 align: Align{x: 0.0 y: 0.0}
@@ -251,7 +251,7 @@ script_mod! {
                 width: Fill height: Fill
                 align: Align{x: 0.0 y: 1.0}
                 padding: theme.space_2
-                card_progress := RmProgressBar{
+                card_progress := mod.widgets.RmProgressBar{
                     height: 4
                 }
             }
@@ -280,23 +280,23 @@ script_mod! {
     mod.widgets.RmCardRow2 = View{
         width: Fill height: Fit
         flow: Right spacing: theme.space_2
-        card0 := RmCard{}
-        card1 := RmCard{}
+        card0 := mod.widgets.RmCard{}
+        card1 := mod.widgets.RmCard{}
     }
     mod.widgets.RmCardRow3 = View{
         width: Fill height: Fit
         flow: Right spacing: theme.space_2
-        card0 := RmCard{}
-        card1 := RmCard{}
-        card2 := RmCard{}
+        card0 := mod.widgets.RmCard{}
+        card1 := mod.widgets.RmCard{}
+        card2 := mod.widgets.RmCard{}
     }
     mod.widgets.RmCardRow4 = View{
         width: Fill height: Fit
         flow: Right spacing: theme.space_2
-        card0 := RmCard{}
-        card1 := RmCard{}
-        card2 := RmCard{}
-        card3 := RmCard{}
+        card0 := mod.widgets.RmCard{}
+        card1 := mod.widgets.RmCard{}
+        card2 := mod.widgets.RmCard{}
+        card3 := mod.widgets.RmCard{}
     }
 
     // ---- section header ------------------------------------------------------------
@@ -391,14 +391,14 @@ script_mod! {
         width: Fill height: Fit
         flow: Flow.Right{wrap: true}
         spacing: theme.space_1
-        chip0 := RmTagChip{}
-        chip1 := RmTagChip{}
-        chip2 := RmTagChip{}
-        chip3 := RmTagChip{}
-        chip4 := RmTagChip{}
-        chip5 := RmTagChip{}
-        chip6 := RmTagChip{}
-        chip7 := RmTagChip{}
+        chip0 := mod.widgets.RmTagChip{}
+        chip1 := mod.widgets.RmTagChip{}
+        chip2 := mod.widgets.RmTagChip{}
+        chip3 := mod.widgets.RmTagChip{}
+        chip4 := mod.widgets.RmTagChip{}
+        chip5 := mod.widgets.RmTagChip{}
+        chip6 := mod.widgets.RmTagChip{}
+        chip7 := mod.widgets.RmTagChip{}
     }
 
     // ---- state views (empty / loading / error) ----------------------------------------
@@ -407,7 +407,7 @@ script_mod! {
         width: Fill height: 280
         flow: Down spacing: theme.space_2
         align: Center
-        IconBookOpen{}
+        mod.widgets.IconBookOpen{}
         empty_title := Label{
             text: "Nothing here yet"
             draw_text.color: theme.color_label_inner
@@ -436,13 +436,13 @@ script_mod! {
         width: Fill height: 280
         flow: Down spacing: theme.space_2
         align: Center
-        IconAlert{}
+        mod.widgets.IconAlert{}
         error_label := Label{
             text: "Something went wrong"
             draw_text.color: theme.color_error
             draw_text.text_style.font_size: theme.font_size_4
         }
-        retry_button := RmSecondaryButton{
+        retry_button := mod.widgets.RmSecondaryButton{
             text: "Retry"
         }
     }
@@ -480,10 +480,10 @@ script_mod! {
         }
         download_state := Label{
             text: ""
-            draw_text.color: mod.rm.ok
+            draw_text.color: mod.rm.color_ok
             draw_text.text_style.font_size: theme.font_size_code
         }
-        download_button := RmSmallButton{
+        download_button := mod.widgets.RmSmallButton{
             text: "Download"
         }
     }
@@ -524,14 +524,14 @@ script_mod! {
                 draw_text.text_style.font_size: theme.font_size_code
             }
         }
-        dl_progress := RmProgressBar{}
+        dl_progress := mod.widgets.RmProgressBar{}
         actions_row := View{
             width: Fill height: Fit
             flow: Right spacing: theme.space_1
             align: Align{x: 1.0}
-            retry_button := RmSmallButton{text: "Retry"}
-            cancel_button := RmSmallButton{text: "Cancel"}
-            remove_button := RmSmallButton{text: "Remove"}
+            retry_button := mod.widgets.RmSmallButton{text: "Retry"}
+            cancel_button := mod.widgets.RmSmallButton{text: "Cancel"}
+            remove_button := mod.widgets.RmSmallButton{text: "Remove"}
         }
     }
 
@@ -607,7 +607,7 @@ script_mod! {
             draw_text.color: theme.color_label_inner_inactive
             draw_text.text_style.font_size: theme.font_size_p
         }
-        set_button := RmSmallButton{
+        set_button := mod.widgets.RmSmallButton{
             text: "Edit"
         }
     }
@@ -648,7 +648,7 @@ script_mod! {
                 draw_text.text_style.font_size: theme.font_size_code
             }
         }
-        browse_tap := RmTap{
+        browse_tap := mod.widgets.RmTap{
             width: Fit height: Fit
             cursor: MouseCursor.Hand
             show_bg: false
