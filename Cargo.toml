@@ -13,6 +13,7 @@ members = [
   "crates/readmesh-app",
   "crates/readmesh-cli",
   "crates/readmesh-ui",
+  "crates/readmesh-ui-dioxus",
 ]
 resolver = "2"
 
@@ -46,7 +47,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # uuid
-uuid = { version = "1", features = ["v4", "v7", "serde"] }
+uuid = { version = "1", features = ["v4", "v7", "serde", "js"] }
 
 # time
 chrono = { version = "0.4", features = ["serde"] }
